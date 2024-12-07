@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Check;
+import org.hibernate.annotations.DialectOverride;
 
 import java.time.LocalDate;
 
@@ -16,8 +17,8 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Check(constraints = "status IN ('pending', 'approved', 'rejected')")
-public class LoanRequest {
+@Check(constraints = "status IN ('paid', 'partial paid', 'not paid') and paymentType IN ('loan', 'monthlyPayment')")
+public class PaymentSchedule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,27 +29,23 @@ public class LoanRequest {
     @Column(columnDefinition = "DOUBLE NOT NULL")
     private Double amount;
 
-    @NotNull(message = "Error: LoanDate is null!")
+    @NotEmpty(message = "Error: Type is empty!")
+    @Pattern(regexp = "loan|monthlyPayment" , message = "Error: paymentType only accept loan or monthlyPayment")
+    @Column(columnDefinition = "VARCHAR(20) NOT NULL ")
+    private String paymentType;
+
+    @NotNull(message = "Error: ScheduleDate is null!")
     @Column(columnDefinition = "DATE NOT NULL")
-    private LocalDate loanDate;
-
-    @NotNull(message = "Error: StartInstallmentDate is null!")
-    @Column(columnDefinition = "DATE NOT NULL")
-    private LocalDate startInstallmentDate;
-
-    @NotNull(message = "Error: InstallmentMonths is null!")
-    @Positive(message = "Error: InstallmentMonths must be positive!")
-    @Column(columnDefinition = "INT NOT NULL")
-    private Integer installmentMonths;
-
-    @NotEmpty(message = "Error: Reason is empty!")
-    @Column(columnDefinition = "VARCHAR(300) NOT NULL")
-    private String reason;
+    private LocalDate scheduleDate;
 
     @NotEmpty(message = "Error: Status is empty!")
-    @Pattern(regexp = "pending|approved|rejected", message = "Error: status only accept pending or approved or rejected")
-    @Column(columnDefinition = "VARCHAR(25) NOT NULL")
+    @Pattern(regexp = "paid|partial paid|not paid", message = "Error: status only accept paid or partial paid or not paid")
+    @Column(columnDefinition = "VARCHAR(20) NOT NULL")
     private String status;
+
+    @ManyToOne
+    @JoinColumn(name = "loanId", nullable = true)
+    private Loan loan;
 
     @ManyToOne
     @JoinColumn(name = "groupSavingAccountId", nullable = true)

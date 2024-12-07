@@ -1,16 +1,12 @@
 package com.example.capstone.Service;
 
-
+import com.example.capstone.ApiResponse.ApiException;
+import com.example.capstone.Model.GroupSavingAccount;
 import com.example.capstone.Model.Transaction;
+import com.example.capstone.Repository.GroupSavingAccountRepository;
 import lombok.RequiredArgsConstructor;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -19,65 +15,70 @@ import java.util.List;
 public class GroupSavingAccountService {
 
 
-    public List<Transaction> getTransactions(){
-        String pdfPath = "C:\\Monthly_202410.pdf"; // Path to your PDF file
-
-        try {
-            // Load PDF document
-            PDDocument document = PDDocument.load(new File(pdfPath));
-            PDFTextStripper pdfStripper = new PDFTextStripper();
-
-            // Extract text from the PDF
-            String text = pdfStripper.getText(document);
-            document.close();
-
-            // Create a list of Transaction objects
-            List<Transaction> transactions = new ArrayList<>();
-
-            // Split the text into rows based on newlines
-            String[] rows = text.split("\n");
-
-            // Iterate through rows and parse relevant data
-            for (String row : rows) {
-                if (row.contains("دائن") || row.contains("مدين")) {
-                    Transaction transaction = new Transaction();
-
-                    // Split the row into columns (adjust logic for actual structure)
-                    String[] columns = row.split("\\s+"); // Adjust for the PDF format
-
-                    try {
-                        // Map columns to Transaction fields
-                        // Example logic for column mapping (adjust indices as needed)
-                        transaction.setTransactionDate(LocalDate.parse(columns[0])); // Date column
-                        transaction.setTransactionDetails(columns[columns.length - 1]); // Details column
-
-                        if (row.contains("دائن")) {
-                            transaction.setTransactionType("Credit");
-                            transaction.setAmount(Double.parseDouble(columns[1])); // Amount for دائن
-                        } else if (row.contains("مدين")) {
-                            transaction.setTransactionType("Debit");
-                            transaction.setAmount(Double.parseDouble(columns[1])); // Amount for مدين
-                        }
-
-                        // Add the transaction to the list
-                        transactions.add(transaction);
-
-                    } catch (Exception e) {
-                        System.out.println("Error parsing row: " + row);
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            return transactions;
+    private final GroupSavingAccountRepository groupSavingAccountRepository;
+    private final TransactionService transactionService;
 
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+    public List<GroupSavingAccount> getAllGroupSavingAccounts() {
+        return groupSavingAccountRepository.findAll();
+    }
+
+    public GroupSavingAccount getGroupSavingAccountById(Integer id) {
+        return groupSavingAccountRepository.findGroupSavingAccountById(id);
+    }
+    public void addGroupSavingAccount(GroupSavingAccount groupSavingAccount) {
+        groupSavingAccount= groupSavingAccountRepository.save(groupSavingAccount);
+        if(groupSavingAccount.getBalance() > 0){
+            Transaction transaction = new Transaction();
+            transaction.setGroupSavingAccount(groupSavingAccount);
+            transaction.setAmount(groupSavingAccount.getBalance());
+            transaction.setTransactionType("Credit");
+            transaction.setTransactionDate(groupSavingAccount.getStartDate());
+            transaction.setTransactionDetails("Opening Balance");
+            transactionService.addTransaction(transaction);
+        }
+    }
+
+    public void updateBalance(Integer id) {
+        GroupSavingAccount groupSavingAccount = groupSavingAccountRepository.findGroupSavingAccountById(id);
+
+        if (groupSavingAccount == null) {
+            throw new ApiException("Error: GroupSavingAccount not found");
         }
 
+        // Fetch transactions and ensure they are updated in place
+        List<Transaction> transactions = groupSavingAccount.getTransactions();
 
+        if (transactions.isEmpty()) {
+            throw new ApiException("Error: There are no transactions in the account");
+        }
+
+        double credit = transactions.stream()
+                .filter(transaction -> "Credit".equalsIgnoreCase(transaction.getTransactionType()))
+                .mapToDouble(Transaction::getAmount)
+                .sum();
+
+        double debit = transactions.stream()
+                .filter(transaction -> "Debit".equalsIgnoreCase(transaction.getTransactionType()))
+                .mapToDouble(Transaction::getAmount)
+                .sum();
+
+        groupSavingAccount.setBalance(credit - debit);
+
+        // Save only when the collection is consistent
+        groupSavingAccountRepository.save(groupSavingAccount);
     }
+    public void updateGroupSavingAccount(Integer id, GroupSavingAccount groupSavingAccount) {
+        if (groupSavingAccountRepository.findGroupSavingAccountById(id) == null) throw new ApiException("Error: GroupSavingAccount not found");
+
+        groupSavingAccount.setId(id);
+        groupSavingAccountRepository.save(groupSavingAccount);
+    }
+    public void deleteGroupSavingAccount(Integer id) {
+        if (groupSavingAccountRepository.findGroupSavingAccountById(id) == null) throw new ApiException("Error: GroupSavingAccount not found");
+
+        groupSavingAccountRepository.deleteById(id);
+    }
+
 
 }
