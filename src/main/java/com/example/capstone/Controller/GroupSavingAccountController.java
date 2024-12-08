@@ -30,19 +30,31 @@ public class GroupSavingAccountController {
         if (errors.hasErrors()) return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
 
         groupSavingAccountService.addGroupSavingAccount(groupSavingAccount);
-        return ResponseEntity.status(201).body(new ApiResponse("GroupSavingAccount added successfully"));
+        return ResponseEntity.status(201).body(new ApiResponse("Group account saving added successfully"));
     }
+    @PostMapping("/create-monthly-payment-schedule/{id}")
+    public ResponseEntity<ApiResponse> createMonthlyPaymentSchedule(@PathVariable Integer id){
 
+        groupSavingAccountService.createMonthlyPaymentSchedule(id);
+        return ResponseEntity.ok(new ApiResponse("Monthly Payment schedule is created"));
+    }
     @PutMapping("/update/{id}")
     public ResponseEntity updateGroupSavingAccount(@PathVariable Integer id, @RequestBody @Valid GroupSavingAccount groupSavingAccount , Errors errors) {
         if (errors.hasErrors()) return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
         groupSavingAccountService.updateGroupSavingAccount(id, groupSavingAccount);
-        return ResponseEntity.ok(new ApiResponse("GroupSavingAccount updated successfully"));
+        return ResponseEntity.ok(new ApiResponse("Group account saving updated successfully"));
+    }
+
+    @PutMapping("/update-balance/{id}")
+    public ResponseEntity updateBalance(@PathVariable Integer id){
+
+        groupSavingAccountService.updateBalance(id);
+        return ResponseEntity.ok(new ApiResponse("Group account saving Balance is been updated successfully"));
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity deleteGroupSavingAccount(@PathVariable Integer id) {
         groupSavingAccountService.deleteGroupSavingAccount(id);
-        return ResponseEntity.ok(new ApiResponse("GroupSavingAccount deleted successfully"));
+        return ResponseEntity.ok(new ApiResponse("Group account saving deleted successfully"));
     }
 }

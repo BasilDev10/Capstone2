@@ -37,6 +37,8 @@ public class PaymentScheduleController {
         return ResponseEntity.status(201).body(new ApiResponse("PaymentSchedule added successfully"));
     }
 
+
+
     @PutMapping("/update/{id}")
     public ResponseEntity<ApiResponse> updatePaymentSchedule(
             @PathVariable Integer id,

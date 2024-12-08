@@ -38,16 +38,28 @@ public class LoanRequestController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ApiResponse> updateLoanRequest(
-            @PathVariable Integer id,
-            @RequestBody @Valid LoanRequest loanRequest,
-            Errors errors
-    ) {
+    public ResponseEntity<ApiResponse> updateLoanRequest(@PathVariable Integer id, @RequestBody @Valid LoanRequest loanRequest, Errors errors) {
         if (errors.hasErrors()) {
             return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
         }
         loanRequestService.updateLoanRequest(id, loanRequest);
         return ResponseEntity.ok(new ApiResponse("LoanRequest updated successfully"));
+    }
+
+    @PutMapping("/update-status/{id}/{leaderId}/{status}")
+    public ResponseEntity updateStatus(@PathVariable Integer id , @PathVariable Integer leaderId , @PathVariable String status){
+
+        loanRequestService.updateStatus(id,leaderId,status);
+        return ResponseEntity.ok(new ApiResponse("Loan request status is updated"));
+
+    }
+
+    @PostMapping("/convert-loan-request-to-loan/{id}")
+    public ResponseEntity convertLonaRequestToLoan(@PathVariable Integer id){
+
+        loanRequestService.convertLonaRequestToLoan(id);
+        return ResponseEntity.ok(new ApiResponse("Loan request converted to loan successfully"));
+
     }
 
     @DeleteMapping("/delete/{id}")

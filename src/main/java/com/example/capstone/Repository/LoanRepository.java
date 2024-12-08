@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 public interface LoanRepository extends JpaRepository<Loan, Integer> {
 
     Loan findLoanById(Integer id);
+
+    Loan findLoanByLoanRequestId(Integer loanRequestId);
 }

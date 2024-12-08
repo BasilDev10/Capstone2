@@ -2,11 +2,15 @@ package com.example.capstone.Service;
 
 import com.example.capstone.ApiResponse.ApiException;
 import com.example.capstone.Model.GroupSavingAccount;
+import com.example.capstone.Model.PaymentSchedule;
 import com.example.capstone.Model.Transaction;
+import com.example.capstone.Model.User;
 import com.example.capstone.Repository.GroupSavingAccountRepository;
+import com.example.capstone.Repository.PaymentScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -17,6 +21,7 @@ public class GroupSavingAccountService {
 
     private final GroupSavingAccountRepository groupSavingAccountRepository;
     private final TransactionService transactionService;
+    private final PaymentScheduleService paymentScheduleService;
 
 
     public List<GroupSavingAccount> getAllGroupSavingAccounts() {
@@ -39,6 +44,40 @@ public class GroupSavingAccountService {
         }
     }
 
+    public void createMonthlyPaymentSchedule(Integer id){
+        GroupSavingAccount groupSavingAccount = getGroupSavingAccountById(id);
+
+        if (groupSavingAccount == null) throw new ApiException("Error: Group Saving Account not found");
+
+        List<User> users = groupSavingAccount.getUsers();
+
+
+
+        LocalDate todayDate = LocalDate.now();
+        double monthlyPayment = 0;
+
+        for (User user : users){
+            PaymentSchedule paymentSchedule = new PaymentSchedule();
+            if (paymentScheduleService.getPaymentScheduleByUserIdAndPaymentTypeAndMonthAndYear(user.getId() ,
+                    "monthlyPayment",(short) todayDate.getMonthValue(),todayDate.getYear()) != null) continue;
+
+            if (user.getGroupSavingAccount() == null) continue;
+
+            monthlyPayment = user.getGroupSavingAccount().getAccountSetting().getMonthlyPayment();
+
+            if (monthlyPayment == 0 ) continue;
+
+            paymentSchedule.setPaymentType("monthlyPayment");
+            paymentSchedule.setGroupSavingAccount(groupSavingAccount);
+            paymentSchedule.setScheduleDate(LocalDate.of(todayDate.getYear(),todayDate.getMonth(),1));
+            paymentSchedule.setAmount(monthlyPayment);
+            paymentSchedule.setStatus("not paid");
+            paymentSchedule.setUser(user);
+
+            paymentScheduleService.addPaymentSchedule(paymentSchedule);
+
+        }
+    }
     public void updateBalance(Integer id) {
         GroupSavingAccount groupSavingAccount = groupSavingAccountRepository.findGroupSavingAccountById(id);
 
@@ -46,7 +85,7 @@ public class GroupSavingAccountService {
             throw new ApiException("Error: GroupSavingAccount not found");
         }
 
-        // Fetch transactions and ensure they are updated in place
+
         List<Transaction> transactions = groupSavingAccount.getTransactions();
 
         if (transactions.isEmpty()) {
@@ -65,7 +104,7 @@ public class GroupSavingAccountService {
 
         groupSavingAccount.setBalance(credit - debit);
 
-        // Save only when the collection is consistent
+
         groupSavingAccountRepository.save(groupSavingAccount);
     }
     public void updateGroupSavingAccount(Integer id, GroupSavingAccount groupSavingAccount) {

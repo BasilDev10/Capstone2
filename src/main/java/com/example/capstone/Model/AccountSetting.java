@@ -26,9 +26,18 @@ public class AccountSetting {
     @Column(columnDefinition = "VARCHAR(50) NOT NULL")
     private String name;
 
+    @NotNull(message = "Error: monthlyPayment is null!")
+    @Column(columnDefinition = "double not null")
+    private Double monthlyPayment;
+
     @PositiveOrZero(message = "Error: percentageLonaAllowed only positive or zero")
     @Column(columnDefinition = "int not null")
     private Integer percentageLonaAllowed;
+
+
+    @NotNull(message = "Error: applyLoan is null!")
+    @Column(columnDefinition = "boolean not null")
+    private Boolean applyLoan;
 
     @NotNull(message = "Error: applyLoanRequest is null!")
     @Column(columnDefinition = "boolean not null")

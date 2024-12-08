@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 public interface PaymentScheduleRepository extends JpaRepository<PaymentSchedule, Integer> {
 
     PaymentSchedule findPaymentScheduleById(Integer id);
+
+    PaymentSchedule findPaymentScheduleByUserIdAndPaymentTypeAndScheduleDate_MonthAndScheduleDateYear(Integer userId ,String PaymentType, short month , int year);
 }

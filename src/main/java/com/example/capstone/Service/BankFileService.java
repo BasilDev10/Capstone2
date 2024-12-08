@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -38,17 +39,23 @@ public class BankFileService {
         bankFile.setName(file.getOriginalFilename());
         bankFile.setPath(file.getOriginalFilename());
 
-
-
-
-
         BankFile bankFileCreated = bankFileRepository.save(bankFile);
         List<Transaction> transactions = transactionService.getTransactionsFromFile(file ,  bankFileCreated);
+        List<Transaction> expansesAndLoan = transactions.stream()
+                .filter(transaction -> "Debit".equalsIgnoreCase(transaction.getTransactionType())).toList();
         transactionService.saveBulkTransactions(transactions );
         groupSavingAccountService.updateBalance(groupSavingAccountId);
 
+
     }
 
+    public void updateExpensesAndLoan(List<Transaction> expansesAndLoan){
+
+        for (Transaction transaction : expansesAndLoan){
+            if (transaction.getId() == null) continue;
+            
+        }
+    }
     public void updateBankFile(Integer id, BankFile bankFile) {
         if (bankFileRepository.findBankFileById(id) == null)
             throw new ApiException("Error: BankFile not found");

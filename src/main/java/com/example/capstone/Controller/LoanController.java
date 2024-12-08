@@ -37,12 +37,15 @@ public class LoanController {
         return ResponseEntity.status(201).body(new ApiResponse("Loan added successfully"));
     }
 
+    @PostMapping("/create-payment-schedule-for-loan/{id}")
+    public ResponseEntity<ApiResponse> createPaymentScheduleForLoan(@PathVariable Integer id){
+
+        loanService.createPaymentScheduleForLoan(id);
+        return ResponseEntity.ok(new ApiResponse("Payment Schedule created for loan successfully"));
+    }
+
     @PutMapping("/update/{id}")
-    public ResponseEntity<ApiResponse> updateLoan(
-            @PathVariable Integer id,
-            @RequestBody @Valid Loan loan,
-            Errors errors
-    ) {
+    public ResponseEntity<ApiResponse> updateLoan(@PathVariable Integer id, @RequestBody @Valid Loan loan, Errors errors) {
         if (errors.hasErrors()) {
             return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
         }

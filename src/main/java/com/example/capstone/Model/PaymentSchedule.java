@@ -29,10 +29,15 @@ public class PaymentSchedule {
     @Column(columnDefinition = "DOUBLE NOT NULL")
     private Double amount;
 
-    @NotEmpty(message = "Error: Type is empty!")
+    @NotEmpty(message = "Error: paymentType is empty!")
     @Pattern(regexp = "loan|monthlyPayment" , message = "Error: paymentType only accept loan or monthlyPayment")
     @Column(columnDefinition = "VARCHAR(20) NOT NULL ")
     private String paymentType;
+
+    @NotEmpty(message = "Error: scheduleCreatedType is empty!")
+    @Pattern(regexp = "system|manually" , message = "Error: scheduleCreatedType only system loan or manually")
+    @Column(columnDefinition = "VARCHAR(20) NOT NULL ")
+    private String scheduleCreatedType;
 
     @NotNull(message = "Error: ScheduleDate is null!")
     @Column(columnDefinition = "DATE NOT NULL")
