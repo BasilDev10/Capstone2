@@ -42,8 +42,4 @@ public class AccountSetting {
     @NotNull(message = "Error: applyLoanRequest is null!")
     @Column(columnDefinition = "boolean not null")
     private Boolean applyLoanRequest;
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "accountSetting", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<GroupSavingAccount> groupSavingAccounts = new ArrayList<>();
 }

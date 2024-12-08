@@ -50,11 +50,8 @@ public class LoanRequest {
     @Column(columnDefinition = "VARCHAR(25) NOT NULL")
     private String status;
 
-    @ManyToOne
-    @JoinColumn(name = "groupSavingAccountId", nullable = true)
-    private GroupSavingAccount groupSavingAccount;
+    private Integer groupSavingAccountId;
 
-    @ManyToOne
-    @JoinColumn(name = "userId", nullable = true)
-    private User user;
+
+    private Integer userId;
 }

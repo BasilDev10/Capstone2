@@ -1,10 +1,7 @@
 package com.example.capstone.Service;
 
 import com.example.capstone.ApiResponse.ApiException;
-import com.example.capstone.Model.Loan;
-import com.example.capstone.Model.LoanRequest;
-import com.example.capstone.Model.PaymentSchedule;
-import com.example.capstone.Model.User;
+import com.example.capstone.Model.*;
 import com.example.capstone.Repository.LoanRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +15,9 @@ public class LoanService {
 
     private final LoanRepository loanRepository;
     private final PaymentScheduleService paymentScheduleService;
+    private final UserService userService;
+    private final AccountSettingService accountSettingService;
+    private final GroupSavingAccountService groupSavingAccountService;
 
     public List<Loan> getAllLoans() {
         return loanRepository.findAll();
@@ -30,15 +30,43 @@ public class LoanService {
     public Loan getLoanByLoanRequestId(Integer id){
         return loanRepository.findLoanByLoanRequestId(id);
     }
-
-    public void addLoan(Loan loan) {
-        loan = loanRepository.save(loan);
-
-        createPaymentScheduleForLoan(loan.getId());
+    public Loan getLoanByUserIdAndGroupSavingAccountIdAndLoanDateAndAmount(Integer userId, Integer groupSavingAccountId, LocalDate loanDate, Double amount){
+        return loanRepository.getLoanByUserIdAndGroupSavingAccountIdAndLoanDateAndAmount(userId,groupSavingAccountId,loanDate,amount);
 
     }
 
-    public void validateLoan(User user){
+    public void addLoan(Loan loan) {
+        validateLoan(loan.getUserId() ,loan.getAmount());
+        loan = loanRepository.save(loan);
+
+        createPaymentScheduleForLoan(loan.getId());
+        groupSavingAccountService.updateBalance(loan.getGroupSavingAccountId());
+        groupSavingAccountService.updatePaymentSchedule(loan.getGroupSavingAccountId());
+    }
+
+    public void validateLoan(Integer userId , Double amount){
+
+        User user = userService.getUserById(userId);
+
+        groupSavingAccountService.updateBalance(user.getGroupSavingAccountId());
+        groupSavingAccountService.updatePaymentSchedule(user.getGroupSavingAccountId());
+
+        GroupSavingAccount groupSavingAccount = groupSavingAccountService.getGroupSavingAccountById(user.getGroupSavingAccountId());
+
+
+
+        AccountSetting accountSetting = accountSettingService.getAccountSettingById(user.getGroupSavingAccountId());
+
+        double allowedLoanAmount = groupSavingAccount.getBalance() * ((double) accountSetting.getPercentageLonaAllowed() /100);
+
+
+
+        if (amount > allowedLoanAmount) throw new ApiException("Error : must loan on range allowed loan amount :"+allowedLoanAmount);
+
+        if (amount > user.getTotalPaidAmount() && user.getTotalPaidAmount()  < groupSavingAccount.getTargetMemberTotalPayment()) throw new ApiException("Error : user can't take a loan if loan amount greater than user payment and user not completed total payment in monthly payment schedule. for this case user only allowed take loan on range payment amount");
+
+
+
 
     }
 
@@ -48,7 +76,7 @@ public class LoanService {
         if (loan == null) throw new ApiException("Error: Loan not found");
 
         LocalDate installmentDate = loan.getStartInstallmentDate();
-        PaymentSchedule paymentSchedule = null;
+        PaymentSchedule paymentSchedule = new PaymentSchedule();
         for (int i = 0; i < loan.getInstallmentMonths(); i++) {
             paymentSchedule = new PaymentSchedule();
 
@@ -56,15 +84,17 @@ public class LoanService {
             else paymentSchedule.setScheduleDate(installmentDate.plusMonths(i));
 
             paymentSchedule.setAmount(loan.getAmount() / loan.getInstallmentMonths());
+            paymentSchedule.setScheduleCreatedType("system");
+            paymentSchedule.setPaidAmount(0.0);
             paymentSchedule.setPaymentType("loan");
             paymentSchedule.setStatus("not paid");
-            paymentSchedule.setLoan(loan);
-            paymentSchedule.setUser(loan.getUser());
-            paymentSchedule.setGroupSavingAccount(loan.getGroupSavingAccount());
-
+            paymentSchedule.setLoanId(loan.getId());
+            paymentSchedule.setUserId(loan.getUserId());
+            paymentSchedule.setGroupSavingAccountId(loan.getGroupSavingAccountId());
+            paymentScheduleService.addPaymentSchedule(paymentSchedule);
         }
 
-        paymentScheduleService.addPaymentSchedule(paymentSchedule);
+
     }
     public void updateLoan(Integer id, Loan loan) {
         if (loanRepository.findLoanById(id) == null) {

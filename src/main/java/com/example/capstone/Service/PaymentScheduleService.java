@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -16,19 +17,24 @@ import java.util.List;
 public class PaymentScheduleService {
 
     private final PaymentScheduleRepository paymentScheduleRepository;
-    private final LoanRepository loanRepository;
 
     public List<PaymentSchedule> getAllPaymentSchedules() {
         return paymentScheduleRepository.findAll();
     }
-
+    public List<PaymentSchedule> getAllPaymentSchedulesByUserId(Integer userId) {
+        return paymentScheduleRepository.findPaymentScheduleByUserId(userId).stream().sorted(Comparator.comparing(PaymentSchedule::getScheduleDate)).toList();
+    }
     public PaymentSchedule getPaymentScheduleById(Integer id) {
         return paymentScheduleRepository.findPaymentScheduleById(id);
     }
 
+    public List<PaymentSchedule> getByGroupSavingAccountId(Integer groupSavingAccountId){
+        return paymentScheduleRepository.findPaymentScheduleByGroupSavingAccountId(groupSavingAccountId);
+    }
 
-    public PaymentSchedule getPaymentScheduleByUserIdAndPaymentTypeAndMonthAndYear(Integer userId ,String PaymentType, short month , int year){
-        return paymentScheduleRepository.findPaymentScheduleByUserIdAndPaymentTypeAndScheduleDate_MonthAndScheduleDateYear(userId,PaymentType,month,year);
+    public PaymentSchedule getPaymentScheduleByUserIdAndPaymentTypeAndMonthAndYear(Integer userId ,String PaymentType,String scheduleCreatedType, int month , int year){
+        return paymentScheduleRepository.getByUserIdAndPaymentTypeAndMonthAndYear(userId,PaymentType,scheduleCreatedType,month,year);
+
     }
     public void addPaymentSchedule(PaymentSchedule paymentSchedule) {
         paymentScheduleRepository.save(paymentSchedule);

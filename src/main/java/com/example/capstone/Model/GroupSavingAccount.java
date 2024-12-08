@@ -33,10 +33,12 @@ public class GroupSavingAccount {
     @Column(columnDefinition = "double not null")
     private Double balance;
 
-    @NotNull(message = "Error: targetBalance is null!")
+    @NotNull(message = "Error: targetMemberTotalPayment is null!")
     @Column(columnDefinition = "double not null")
-    private Double targetBalance;
+    private Double targetAccountTotalPayment;
 
+
+    private Double targetMemberTotalPayment;
     @NotNull(message = "Error: overdueAmount  is null!")
     @Column(columnDefinition = "double not null")
     private Double overdueAmount ;
@@ -45,23 +47,10 @@ public class GroupSavingAccount {
     @Column(columnDefinition = "date not null")
     private LocalDate StartDate;
 
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "account_setting_id", referencedColumnName = "id", nullable = true,
-            foreignKey = @ForeignKey(name = "fk_group_saving_account_account_setting"))
-    private AccountSetting accountSetting;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "groupSavingAccount", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BankFile> bankFiles = new ArrayList<>();
+    private Integer accountSettingId;
 
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "groupSavingAccount", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = false)
-    private List<Transaction> transactions = new ArrayList<>();
-    @JsonIgnore
-    @OneToMany(mappedBy = "groupSavingAccount", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<User> users = new ArrayList<>();
 
 
 }

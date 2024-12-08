@@ -1,14 +1,10 @@
 package com.example.capstone.Model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Check;
 
 import java.time.LocalDate;
 
@@ -16,7 +12,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Check(constraints = "status IN ('paid', 'partial paid', 'not paid') and type IN ('group', 'personal')")
 public class Loan {
 
     @Id
@@ -25,12 +20,12 @@ public class Loan {
 
     @NotNull(message = "Error: Amount is null!")
     @Positive(message = "Error: Amount must be positive!")
-    @Column(columnDefinition = "double NOT NULL")
+    @Column(columnDefinition = "double ")
     private Double amount;
 
-    @Positive(message = "Error: PaidAmount must be positive!")
-    @Column(columnDefinition = "double DEFAULT 0")
-    private Double paidAmount = 0.0;
+    @PositiveOrZero(message = "Error: PaidAmount must be positive or zero!")
+    @Column(columnDefinition = "double ")
+    private Double paidAmount;
 
     @NotNull(message = "Error: LoanDate is null!")
     @Column(columnDefinition = "DATE NOT NULL")
@@ -42,7 +37,7 @@ public class Loan {
 
     @NotNull(message = "Error: InstallmentMonths is null!")
     @Positive(message = "Error: InstallmentMonths must be positive!")
-    @Column(columnDefinition = "INT NOT NULL")
+    @Column(columnDefinition = "int NOT NULL")
     private Integer installmentMonths;
 
     @NotEmpty(message = "Error: Type is empty!")
@@ -52,22 +47,18 @@ public class Loan {
 
     @NotEmpty(message = "Error: Status is empty!")
     @Pattern(regexp = "paid|partial paid|not paid", message = "Error: status only accept paid or partial paid or not paid")
-    @Column(columnDefinition = "VARCHAR(25) NOT NULL )")
+    @Column(columnDefinition = "VARCHAR(25) NOT NULL ")
     private String status;
 
-    @ManyToOne
-    @JoinColumn(name = "groupSavingAccountId", nullable = true)
-    private GroupSavingAccount groupSavingAccount;
 
-    @ManyToOne
-    @JoinColumn(name = "userId", nullable = true)
-    private User user;
+    private Integer groupSavingAccountId;
 
-    @ManyToOne
-    @JoinColumn(name = "transactionId", nullable = true)
-    private Transaction transaction;
 
-    @ManyToOne
-    @JoinColumn(name = "loanRequestId", nullable = true)
-    private LoanRequest loanRequest;
+    private Integer userId;
+
+
+    private Integer transactionId;
+
+
+    private Integer loanRequestId;
 }

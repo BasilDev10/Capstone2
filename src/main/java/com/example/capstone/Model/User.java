@@ -32,25 +32,14 @@ public class User {
     @Column(columnDefinition = "VARCHAR(50) NOT NULL")
     private String password;
 
-    @NotEmpty(message = "Error: bankAccountNumber is empty!")
-    @Size(max = 50, message = "Error: bankAccountNumber length must not exceed 50 characters")
-    @Column(columnDefinition = "VARCHAR(50) NOT NULL UNIQUE")
-    private String bankAccountNumber;
+    @Column(columnDefinition = "double default 0")
+    private Double totalPaidAmount;
 
     @NotEmpty(message = "Error: role is empty!")
     @Pattern(regexp = "leader|member", message = "Error: role must be either 'leader' or 'member'")
     @Column(columnDefinition = "VARCHAR(10) NOT NULL")
     private String role;
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "group_saving_account_id", nullable = true ,foreignKey = @ForeignKey(name = "fk_user_group_saving_account"))
-    private GroupSavingAccount groupSavingAccount;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Transaction> transactions;
+    private Integer groupSavingAccountId;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserBankAccount> userBankAccounts;
 }

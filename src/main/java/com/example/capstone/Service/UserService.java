@@ -18,6 +18,9 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    public List<User> getAllUsersByGroupSavingAccountId(Integer groupSavingAccountId) {
+        return userRepository.findUserByGroupSavingAccountId(groupSavingAccountId);
+    }
     public User getUserById(Integer id) {
         return userRepository.findById(id).orElseThrow(() -> new ApiException("Error: User not found"));
     }

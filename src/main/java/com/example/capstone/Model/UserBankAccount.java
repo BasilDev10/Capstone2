@@ -15,16 +15,10 @@ public class UserBankAccount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotEmpty(message = "Error: Bank Name is empty!")
-    @Column(columnDefinition = "VARCHAR(50) NOT NULL")
-    private String bankName;
-
     @NotEmpty(message = "Error: Account Number is empty!")
-    @Column(columnDefinition = "VARCHAR(100) NOT NULL")
+    @Column(columnDefinition = "VARCHAR(100) NOT NULL unique")
     private String accountNumber;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = true,
-            foreignKey = @ForeignKey(name = "fk_user_bank_account_user"))
-    private User user;
+
+    private Integer userId;
 }

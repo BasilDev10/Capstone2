@@ -19,6 +19,17 @@ public class UserBankAccountService {
         return userBankAccountRepository.findAll();
     }
 
+    public UserBankAccount getUserBankAccountByAccountNumber(String accountNumber) {
+
+        List<UserBankAccount> getAllUserBankAccounts = userBankAccountRepository.findAll();
+
+        for (UserBankAccount userBankAccount : getAllUserBankAccounts) {
+            if (accountNumber.contains(userBankAccount.getAccountNumber())) {
+                return userBankAccount;
+            }
+        }
+        return null;
+    }
 
     public UserBankAccount getUserBankAccountById(Integer id) {
         UserBankAccount userBankAccount = userBankAccountRepository.findUserBankAccountById(id);

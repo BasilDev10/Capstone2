@@ -28,6 +28,10 @@ public class PaymentScheduleController {
         return ResponseEntity.ok(paymentScheduleService.getPaymentScheduleById(id));
     }
 
+    @GetMapping("/get-by-user/{userId}")
+    public ResponseEntity getAllPaymentSchedulesByUserId(@PathVariable Integer userId){
+        return ResponseEntity.ok(paymentScheduleService.getAllPaymentSchedulesByUserId(userId));
+    }
     @PostMapping("/add")
     public ResponseEntity<ApiResponse> addPaymentSchedule(@RequestBody @Valid PaymentSchedule paymentSchedule, Errors errors) {
         if (errors.hasErrors()) {

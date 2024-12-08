@@ -26,7 +26,7 @@ public class GroupSavingAccountController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity addGroupSavingAccount(@RequestBody @Valid GroupSavingAccount groupSavingAccount , Errors errors) {
+    public ResponseEntity<ApiResponse> addGroupSavingAccount(@RequestBody @Valid GroupSavingAccount groupSavingAccount , Errors errors) {
         if (errors.hasErrors()) return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
 
         groupSavingAccountService.addGroupSavingAccount(groupSavingAccount);
@@ -39,21 +39,28 @@ public class GroupSavingAccountController {
         return ResponseEntity.ok(new ApiResponse("Monthly Payment schedule is created"));
     }
     @PutMapping("/update/{id}")
-    public ResponseEntity updateGroupSavingAccount(@PathVariable Integer id, @RequestBody @Valid GroupSavingAccount groupSavingAccount , Errors errors) {
+    public ResponseEntity<ApiResponse> updateGroupSavingAccount(@PathVariable Integer id, @RequestBody @Valid GroupSavingAccount groupSavingAccount , Errors errors) {
         if (errors.hasErrors()) return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
         groupSavingAccountService.updateGroupSavingAccount(id, groupSavingAccount);
         return ResponseEntity.ok(new ApiResponse("Group account saving updated successfully"));
     }
 
+
+    @PutMapping("/update-payment-schedule/{id}")
+    public ResponseEntity<ApiResponse> updatePaymentSchedule(@PathVariable Integer id) {
+        groupSavingAccountService.updatePaymentSchedule(id);
+        return ResponseEntity.ok(new ApiResponse("Group account saving Payment schedule is been updated successfully"));
+    }
+
     @PutMapping("/update-balance/{id}")
-    public ResponseEntity updateBalance(@PathVariable Integer id){
+    public ResponseEntity<ApiResponse> updateBalance(@PathVariable Integer id){
 
         groupSavingAccountService.updateBalance(id);
         return ResponseEntity.ok(new ApiResponse("Group account saving Balance is been updated successfully"));
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity deleteGroupSavingAccount(@PathVariable Integer id) {
+    public ResponseEntity<ApiResponse> deleteGroupSavingAccount(@PathVariable Integer id) {
         groupSavingAccountService.deleteGroupSavingAccount(id);
         return ResponseEntity.ok(new ApiResponse("Group account saving deleted successfully"));
     }

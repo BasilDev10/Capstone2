@@ -45,7 +45,11 @@ public class LoanRequestService {
         if (leaderUser == null) throw new ApiException("Error: user not found");
         if (!leaderUser.getRole().equalsIgnoreCase("leader")) throw new ApiException("Error: user not allowed update status");
         if (loanRequest.getStatus().equalsIgnoreCase("approved")||loanRequest.getStatus().equalsIgnoreCase("rejected")) throw new ApiException("Error: Loan request is already approved or rejected");
+        if (status.equalsIgnoreCase("approved")){
 
+
+            loanService.validateLoan(loanRequest.getUserId() , loanRequest.getAmount());
+        }
         loanRequest.setStatus(status);
         loanRequestRepository.save(loanRequest);
 
@@ -58,21 +62,21 @@ public class LoanRequestService {
     public void convertLonaRequestToLoan(Integer id){
         LoanRequest loanRequest = getLoanRequestById(id);
         if (loanService.getLoanByLoanRequestId(loanRequest.getId()) != null) throw new ApiException("Error: Loan already created");
-        if (loanRequest.getStatus().equalsIgnoreCase("approved")) throw new ApiException("Error: loanRequest not approved or rejected");
-        loanService.validateLoan(loanRequest.getUser());
+        if (!loanRequest.getStatus().equalsIgnoreCase("approved")) throw new ApiException("Error: loanRequest not approved");
+
 
 
         Loan loan = new Loan();
 
-        loan.setLoanRequest(loanRequest);
+        loan.setLoanRequestId(loanRequest.getId());
         loan.setLoanDate(loanRequest.getLoanDate());
         loan.setInstallmentMonths(loanRequest.getInstallmentMonths());
         loan.setStartInstallmentDate(loanRequest.getStartInstallmentDate());
         loan.setLoanType("personal");
         loan.setStatus("not paid");
         loan.setAmount(loanRequest.getAmount());
-        loan.setGroupSavingAccount(loanRequest.getGroupSavingAccount());
-        loan.setUser(loanRequest.getUser());
+        loan.setGroupSavingAccountId(loanRequest.getGroupSavingAccountId());
+        loan.setUserId(loanRequest.getUserId());
 
         loanService.addLoan(loan);
 

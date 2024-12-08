@@ -41,19 +41,10 @@ public class Transaction {
     private Double amount;
 
 
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = true,
-            foreignKey = @ForeignKey(name = "fk_transaction_user"))
-    private User user;
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "group_saving_account_id", referencedColumnName = "id", nullable = true,
-            foreignKey = @ForeignKey(name = "fk_transaction_group_saving_account"))
-    private GroupSavingAccount groupSavingAccount;
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "bank_file_id", referencedColumnName = "id", nullable = true,
-            foreignKey = @ForeignKey(name = "fk_transaction_bank_file"))
-    private BankFile bankFile;
+
+    private Integer userId;
+
+    private Integer groupSavingAccountId;
+
+    private Integer bankFileId;
 }

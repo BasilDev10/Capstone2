@@ -1,7 +1,6 @@
 package com.example.capstone.Service;
 
-import com.example.capstone.Model.BankFile;
-import com.example.capstone.Model.Transaction;
+import com.example.capstone.Model.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -23,9 +22,15 @@ public class TransactionService {
 
 
     private final TransactionRepository transactionRepository;
+    private final UserBankAccountService userBankAccountService;
+    private final UserService userService;
 
     public List<Transaction> getAllTransactions() {
         return transactionRepository.findAll();
+    }
+
+    public List<Transaction> getTransactionsByGroupSavingAccountId(Integer groupSavingAccountId){
+        return transactionRepository.findTransactionsByGroupSavingAccountId(groupSavingAccountId);
     }
 
     public Transaction getTransactionById(Integer id) {
@@ -53,7 +58,7 @@ public class TransactionService {
         transactionRepository.deleteById(id);
     }
 
-    public List<Transaction> getTransactionsFromFile(MultipartFile file , BankFile bankFile){
+    public List<Transaction> getTransactionsFromFile(MultipartFile file , BankFile bankFile , GroupSavingAccount groupSavingAccount){
         try {
 
             PDDocument document = PDDocument.load(file.getInputStream());
@@ -100,7 +105,7 @@ public class TransactionService {
                 text = text.replace(tableContent, "");
             }
 
-            return processRows(tables,bankFile);
+            return processRows(tables,bankFile , groupSavingAccount);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -109,8 +114,10 @@ public class TransactionService {
 
 
     }
-    public List<Transaction> processRows(ArrayList<String []> tables, BankFile bankFile) {
+    public List<Transaction> processRows(ArrayList<String []> tables, BankFile bankFile , GroupSavingAccount groupSavingAccount) {
         List<Transaction> transactions = new ArrayList<>();
+
+
         for (String[] rows : tables) {
 
 
@@ -127,6 +134,12 @@ public class TransactionService {
 
                 if (row.contains("0.00 SAR")) {
                     if (!transaction.equals(new Transaction()) && transaction.getAmount() != null) {
+
+                        UserBankAccount userBankAccount = userBankAccountService.getUserBankAccountByAccountNumber(transaction.getTransactionDetails());
+                        if(userBankAccount != null){
+                            User user = userService.getUserById(userBankAccount.getUserId());
+                            transaction.setUserId(user.getId());
+                        }
 
                         transactions.add(transaction);
                         transaction = new Transaction();
@@ -153,11 +166,14 @@ public class TransactionService {
                 } else if (row.matches("\\d{4}/\\d{2}/\\d{2}")) {
 
                     transactionDate = LocalDate.parse(row, dateFormatter);
+
+                    if(groupSavingAccount.getStartDate().isAfter(transactionDate)) throw new ApiException("Error : you cant upload report have transaction before account start date");
+
                     transaction.setTransactionType(transactionType);
                     transaction.setTransactionDate(transactionDate);
                     transaction.setAmount(amount);
-                    transaction.setBankFile(bankFile);
-                    transaction.setGroupSavingAccount(bankFile.getGroupSavingAccount());
+                    transaction.setBankFileId(bankFile.getId());
+                    transaction.setGroupSavingAccountId(bankFile.getGroupSavingAccountId());
 
 
                     transactionDetails = "";

@@ -6,6 +6,7 @@ import com.example.capstone.Repository.ExpensesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -18,6 +19,10 @@ public class ExpensesService {
         return expensesRepository.findAll();
     }
 
+    public Expenses getExpensesByUserIdAndGroupSavingAccountIdAndExpensesDateAndAmount(Integer userId, Integer groupSavingAccountId, LocalDate expensesDate, Double amount) {
+        return expensesRepository.getExpensesByUserIdAndGroupSavingAccountIdAndExpensesDateAndAmount(userId, groupSavingAccountId, expensesDate, amount);
+
+    }
     public Expenses getExpensesById(Integer id) {
         Expenses expenses = expensesRepository.findExpensesById(id);
         if (expenses == null) {

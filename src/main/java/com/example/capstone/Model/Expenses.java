@@ -30,14 +30,15 @@ public class Expenses {
     private LocalDate expensesDate;
 
     @NotEmpty(message = "Error: Type is empty!")
-    @Column(columnDefinition = "VARCHAR(50) NOT NULL")
+    @Column(columnDefinition = "VARCHAR(300) NOT NULL")
     private String type;
 
-    @ManyToOne
-    @JoinColumn(name = "groupSavingAccountId", nullable = true)
-    private GroupSavingAccount groupSavingAccount;
 
-    @ManyToOne
-    @JoinColumn(name = "transactionId", nullable = true)
-    private Transaction transaction;
+    @NotNull(message = "Error: groupSavingAccountId is null")
+    @Column(columnDefinition = "int NOT NULL")
+    private Integer groupSavingAccountId;
+
+    @Column(columnDefinition = "int")
+    private Integer transactionId;
+    private Integer userId;
 }

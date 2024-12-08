@@ -1,17 +1,17 @@
 package com.example.capstone.Service;
 
 import com.example.capstone.ApiResponse.ApiException;
-import com.example.capstone.Model.GroupSavingAccount;
-import com.example.capstone.Model.PaymentSchedule;
-import com.example.capstone.Model.Transaction;
-import com.example.capstone.Model.User;
+import com.example.capstone.Model.*;
+import com.example.capstone.Repository.AccountSettingRepository;
 import com.example.capstone.Repository.GroupSavingAccountRepository;
 import com.example.capstone.Repository.PaymentScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 
 @Service
@@ -22,6 +22,9 @@ public class GroupSavingAccountService {
     private final GroupSavingAccountRepository groupSavingAccountRepository;
     private final TransactionService transactionService;
     private final PaymentScheduleService paymentScheduleService;
+    private final UserService userService;
+    private final AccountSettingRepository accountSettingRepository;
+    private final AccountSettingService accountSettingService;
 
 
     public List<GroupSavingAccount> getAllGroupSavingAccounts() {
@@ -32,16 +35,28 @@ public class GroupSavingAccountService {
         return groupSavingAccountRepository.findGroupSavingAccountById(id);
     }
     public void addGroupSavingAccount(GroupSavingAccount groupSavingAccount) {
+        AccountSetting accountSetting = new AccountSetting();
+        accountSetting.setName(groupSavingAccount.getName());
+        accountSetting.setApplyLoan(true);
+        accountSetting.setApplyLoanRequest(true);
+        accountSetting.setMonthlyPayment(500.0);
+        accountSetting.setPercentageLonaAllowed(50);
+        accountSetting = accountSettingRepository.save(accountSetting);
+        groupSavingAccount.setAccountSettingId(accountSetting.getId());
+
         groupSavingAccount= groupSavingAccountRepository.save(groupSavingAccount);
+
         if(groupSavingAccount.getBalance() > 0){
             Transaction transaction = new Transaction();
-            transaction.setGroupSavingAccount(groupSavingAccount);
+            transaction.setGroupSavingAccountId(groupSavingAccount.getId());
             transaction.setAmount(groupSavingAccount.getBalance());
             transaction.setTransactionType("Credit");
             transaction.setTransactionDate(groupSavingAccount.getStartDate());
             transaction.setTransactionDetails("Opening Balance");
             transactionService.addTransaction(transaction);
         }
+
+
     }
 
     public void createMonthlyPaymentSchedule(Integer id){
@@ -49,7 +64,7 @@ public class GroupSavingAccountService {
 
         if (groupSavingAccount == null) throw new ApiException("Error: Group Saving Account not found");
 
-        List<User> users = groupSavingAccount.getUsers();
+        List<User> users = userService.getAllUsersByGroupSavingAccountId(groupSavingAccount.getId());
 
 
 
@@ -59,20 +74,24 @@ public class GroupSavingAccountService {
         for (User user : users){
             PaymentSchedule paymentSchedule = new PaymentSchedule();
             if (paymentScheduleService.getPaymentScheduleByUserIdAndPaymentTypeAndMonthAndYear(user.getId() ,
-                    "monthlyPayment",(short) todayDate.getMonthValue(),todayDate.getYear()) != null) continue;
+                    "monthlyPayment","system", todayDate.getMonthValue(),todayDate.getYear()) != null) continue;
 
-            if (user.getGroupSavingAccount() == null) continue;
+            if (user.getGroupSavingAccountId() == null) continue;
 
-            monthlyPayment = user.getGroupSavingAccount().getAccountSetting().getMonthlyPayment();
+            AccountSetting accountSetting = accountSettingService.getAccountSettingById(groupSavingAccount.getAccountSettingId());
+
+            monthlyPayment = accountSetting.getMonthlyPayment();
 
             if (monthlyPayment == 0 ) continue;
 
             paymentSchedule.setPaymentType("monthlyPayment");
-            paymentSchedule.setGroupSavingAccount(groupSavingAccount);
+            paymentSchedule.setScheduleCreatedType("system");
+            paymentSchedule.setPaidAmount(0.0);
+            paymentSchedule.setGroupSavingAccountId(groupSavingAccount.getId());
             paymentSchedule.setScheduleDate(LocalDate.of(todayDate.getYear(),todayDate.getMonth(),1));
             paymentSchedule.setAmount(monthlyPayment);
             paymentSchedule.setStatus("not paid");
-            paymentSchedule.setUser(user);
+            paymentSchedule.setUserId(user.getId());
 
             paymentScheduleService.addPaymentSchedule(paymentSchedule);
 
@@ -86,10 +105,11 @@ public class GroupSavingAccountService {
         }
 
 
-        List<Transaction> transactions = groupSavingAccount.getTransactions();
+        List<Transaction> transactions = transactionService.getTransactionsByGroupSavingAccountId(groupSavingAccount.getId());
 
         if (transactions.isEmpty()) {
-            throw new ApiException("Error: There are no transactions in the account");
+            groupSavingAccount.setBalance(0.0);
+            groupSavingAccountRepository.save(groupSavingAccount);
         }
 
         double credit = transactions.stream()
@@ -103,9 +123,85 @@ public class GroupSavingAccountService {
                 .sum();
 
         groupSavingAccount.setBalance(credit - debit);
-
-
         groupSavingAccountRepository.save(groupSavingAccount);
+    }
+
+    public void updatePaymentSchedule(Integer id) {
+        GroupSavingAccount groupSavingAccount = groupSavingAccountRepository.findGroupSavingAccountById(id);
+        if (groupSavingAccount == null) throw new ApiException("Error: GroupSavingAccount not found");
+        List<PaymentSchedule> paymentSchedules = paymentScheduleService.getByGroupSavingAccountId(id);
+        if (paymentSchedules.isEmpty()) return;
+
+        List<User> users = userService.getAllUsersByGroupSavingAccountId(groupSavingAccount.getId());
+
+        if (users.isEmpty()) return;
+
+        List<Transaction> transactions = transactionService.getTransactionsByGroupSavingAccountId(groupSavingAccount.getId());
+
+
+        for (User user : users){
+
+
+            List<PaymentSchedule> userPaymentSchedule = paymentSchedules.stream()
+                    .filter(paymentSchedule -> Objects.equals(paymentSchedule.getUserId(), user.getId()))
+                    .sorted(Comparator.comparing(PaymentSchedule::getScheduleDate))
+                    .toList();
+
+            double userPaidAmount =  transactions.stream().
+                    filter(transaction -> Objects.equals(transaction.getUserId(), user.getId()) &&  "Credit".equalsIgnoreCase(transaction.getTransactionType()) )
+                    .mapToDouble(Transaction::getAmount)
+                    .sum();
+
+            user.setTotalPaidAmount(userPaidAmount);
+
+            userService.updateUser(user.getId(), user);
+
+            for (PaymentSchedule paymentSchedule : userPaymentSchedule){
+                if(userPaidAmount == 0){
+                    paymentSchedule.setStatus("not paid");
+                    paymentSchedule.setPaidAmount(0.0);
+                    paymentScheduleService.updatePaymentSchedule(paymentSchedule.getId(),paymentSchedule);
+                }else if (userPaidAmount >= paymentSchedule.getAmount() ){
+                    paymentSchedule.setStatus("paid");
+                    paymentSchedule.setPaidAmount(paymentSchedule.getAmount());
+                    paymentScheduleService.updatePaymentSchedule(paymentSchedule.getId(),paymentSchedule);
+                    userPaidAmount -= paymentSchedule.getAmount();
+                }else if (userPaidAmount < paymentSchedule.getAmount() ){
+                    paymentSchedule.setStatus("partial paid");
+                    paymentSchedule.setPaidAmount(userPaidAmount);
+                    paymentScheduleService.updatePaymentSchedule(paymentSchedule.getId(),paymentSchedule);
+                    userPaidAmount = 0;
+                }
+            }
+
+            double targetMemberTotalPayment = (paymentSchedules.stream()
+                    .filter(paymentSchedule -> paymentSchedule.getPaymentType().equalsIgnoreCase("monthlyPayment"))
+                    .mapToDouble(PaymentSchedule::getAmount)
+                    .sum())/users.size();
+            groupSavingAccount.setTargetMemberTotalPayment(targetMemberTotalPayment);
+
+            double targetAccountTotalPayment = paymentSchedules.stream()
+                    .mapToDouble(PaymentSchedule::getAmount)
+                    .sum();
+            groupSavingAccount.setTargetAccountTotalPayment(targetAccountTotalPayment);
+
+            double overdueAmount = paymentScheduleService.getByGroupSavingAccountId(id)
+                    .stream()
+                    .filter(paymentSchedule ->
+                            paymentSchedule.getStatus().equalsIgnoreCase("not paid") ||
+                                    paymentSchedule.getStatus().equalsIgnoreCase("partial paid")
+                    )
+                    .mapToDouble(paymentSchedule ->
+                            paymentSchedule.getAmount() - paymentSchedule.getPaidAmount()
+                    )
+                    .sum();
+
+            groupSavingAccount.setOverdueAmount(overdueAmount);
+            groupSavingAccountRepository.save(groupSavingAccount);
+
+
+        }
+
     }
     public void updateGroupSavingAccount(Integer id, GroupSavingAccount groupSavingAccount) {
         if (groupSavingAccountRepository.findGroupSavingAccountById(id) == null) throw new ApiException("Error: GroupSavingAccount not found");

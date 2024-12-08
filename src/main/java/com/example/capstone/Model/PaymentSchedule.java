@@ -1,10 +1,7 @@
 package com.example.capstone.Model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +14,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Check(constraints = "status IN ('paid', 'partial paid', 'not paid') and paymentType IN ('loan', 'monthlyPayment')")
+//@Check(constraints = "status IN ('paid', 'partial paid', 'not paid') and paymentType IN ('loan', 'monthlyPayment')")
 public class PaymentSchedule {
 
     @Id
@@ -28,6 +25,11 @@ public class PaymentSchedule {
     @Positive(message = "Error: Amount must be positive!")
     @Column(columnDefinition = "DOUBLE NOT NULL")
     private Double amount;
+
+    @NotNull(message = "Error: Amount is null!")
+    @PositiveOrZero(message = "Error: Amount must be positive or zero!")
+    @Column(columnDefinition = "DOUBLE NOT NULL")
+    private Double PaidAmount;
 
     @NotEmpty(message = "Error: paymentType is empty!")
     @Pattern(regexp = "loan|monthlyPayment" , message = "Error: paymentType only accept loan or monthlyPayment")
@@ -48,15 +50,12 @@ public class PaymentSchedule {
     @Column(columnDefinition = "VARCHAR(20) NOT NULL")
     private String status;
 
-    @ManyToOne
-    @JoinColumn(name = "loanId", nullable = true)
-    private Loan loan;
 
-    @ManyToOne
-    @JoinColumn(name = "groupSavingAccountId", nullable = true)
-    private GroupSavingAccount groupSavingAccount;
+    private Integer loanId;
 
-    @ManyToOne
-    @JoinColumn(name = "userId", nullable = true)
-    private User user;
+
+    private Integer groupSavingAccountId;
+
+
+    private Integer userId;
 }

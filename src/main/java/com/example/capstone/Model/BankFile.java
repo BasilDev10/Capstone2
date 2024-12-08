@@ -3,6 +3,7 @@ package com.example.capstone.Model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -31,13 +32,8 @@ public class BankFile {
     @Column(columnDefinition = "VARCHAR(200) NOT NULL")
     private String path;
 
+    @NotNull(message = "Error: groupSavingAccountId is null")
+    @Column(columnDefinition = "int NOT NULL")
+    private Integer groupSavingAccountId;
 
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "group_saving_account_id", referencedColumnName = "id", nullable = true,
-            foreignKey = @ForeignKey(name = "fk_bank_file_group_saving_account"))
-    private GroupSavingAccount groupSavingAccount;
-    @JsonIgnore
-    @OneToMany(mappedBy = "bankFile", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = false)
-    private List<Transaction> transactions = new ArrayList<>();
 }
