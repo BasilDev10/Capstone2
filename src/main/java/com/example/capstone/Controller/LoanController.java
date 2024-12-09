@@ -28,6 +28,7 @@ public class LoanController {
         return ResponseEntity.ok(loanService.getLoanById(id));
     }
 
+    //endpoint 5
     @PostMapping("/add")
     public ResponseEntity<ApiResponse> addLoan(@RequestBody @Valid Loan loan, Errors errors) {
         if (errors.hasErrors()) {
@@ -37,6 +38,7 @@ public class LoanController {
         return ResponseEntity.status(201).body(new ApiResponse("Loan added successfully"));
     }
 
+    // endpoint 6
     @PostMapping("/create-payment-schedule-for-loan/{id}")
     public ResponseEntity<ApiResponse> createPaymentScheduleForLoan(@PathVariable Integer id){
 

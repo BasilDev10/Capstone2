@@ -25,6 +25,8 @@ public class GroupSavingAccountController {
         return ResponseEntity.ok(groupSavingAccountService.getAllGroupSavingAccounts());
     }
 
+    // Endpoint 2
+    // create group saving account and by default create account setting and if have balance in the account create transaction name opening balance
     @PostMapping("/add")
     public ResponseEntity<ApiResponse> addGroupSavingAccount(@RequestBody @Valid GroupSavingAccount groupSavingAccount , Errors errors) {
         if (errors.hasErrors()) return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
@@ -32,6 +34,8 @@ public class GroupSavingAccountController {
         groupSavingAccountService.addGroupSavingAccount(groupSavingAccount);
         return ResponseEntity.status(201).body(new ApiResponse("Group account saving added successfully"));
     }
+    // endpoint 3
+    // update create monthly payment schedule every month
     @PostMapping("/create-monthly-payment-schedule/{id}")
     public ResponseEntity<ApiResponse> createMonthlyPaymentSchedule(@PathVariable Integer id){
 
@@ -46,12 +50,16 @@ public class GroupSavingAccountController {
     }
 
 
+    // endpoint 3
+    // update payment schedule
     @PutMapping("/update-payment-schedule/{id}")
     public ResponseEntity<ApiResponse> updatePaymentSchedule(@PathVariable Integer id) {
         groupSavingAccountService.updatePaymentSchedule(id);
         return ResponseEntity.ok(new ApiResponse("Group account saving Payment schedule is been updated successfully"));
     }
 
+    // endpoint 4
+    // update balance group saving account
     @PutMapping("/update-balance/{id}")
     public ResponseEntity<ApiResponse> updateBalance(@PathVariable Integer id){
 

@@ -28,6 +28,7 @@ public class LoanRequestController {
         return ResponseEntity.ok(loanRequestService.getLoanRequestById(id));
     }
 
+    // endpoint 7
     @PostMapping("/add")
     public ResponseEntity<ApiResponse> addLoanRequest(@RequestBody @Valid LoanRequest loanRequest, Errors errors) {
         if (errors.hasErrors()) {
@@ -46,6 +47,7 @@ public class LoanRequestController {
         return ResponseEntity.ok(new ApiResponse("LoanRequest updated successfully"));
     }
 
+    // endpoint 8
     @PutMapping("/update-status/{id}/{leaderId}/{status}")
     public ResponseEntity updateStatus(@PathVariable Integer id , @PathVariable Integer leaderId , @PathVariable String status){
 
@@ -54,6 +56,7 @@ public class LoanRequestController {
 
     }
 
+    // endpoint 9
     @PostMapping("/convert-loan-request-to-loan/{id}")
     public ResponseEntity convertLonaRequestToLoan(@PathVariable Integer id){
 

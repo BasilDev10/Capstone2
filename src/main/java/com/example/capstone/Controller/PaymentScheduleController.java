@@ -28,6 +28,7 @@ public class PaymentScheduleController {
         return ResponseEntity.ok(paymentScheduleService.getPaymentScheduleById(id));
     }
 
+    // endpoint 10
     @GetMapping("/get-by-user/{userId}")
     public ResponseEntity getAllPaymentSchedulesByUserId(@PathVariable Integer userId){
         return ResponseEntity.ok(paymentScheduleService.getAllPaymentSchedulesByUserId(userId));
