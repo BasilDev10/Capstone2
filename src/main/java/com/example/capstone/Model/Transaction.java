@@ -41,10 +41,11 @@ public class Transaction {
     private Double amount;
 
 
-
+    @Column(columnDefinition = "int")
     private Integer userId;
-
+    @NotNull(message = "Error: groupSavingAccountId is null")
+    @Column(columnDefinition = "int not null")
     private Integer groupSavingAccountId;
-
+    @Column(columnDefinition = "int")
     private Integer bankFileId;
 }

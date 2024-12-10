@@ -22,30 +22,18 @@ public class ExpensesController {
     public ResponseEntity<List<Expenses>> getAllExpenses() {
         return ResponseEntity.ok(expensesService.getAllExpenses());
     }
-
     @GetMapping("/get/{id}")
     public ResponseEntity<Expenses> getExpensesById(@PathVariable Integer id) {
         return ResponseEntity.ok(expensesService.getExpensesById(id));
     }
-
     @PostMapping("/add")
-    public ResponseEntity<ApiResponse> addExpenses(@RequestBody @Valid Expenses expenses, Errors errors) {
-        if (errors.hasErrors()) {
-            return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
-        }
+    public ResponseEntity<ApiResponse> addExpenses(@RequestBody @Valid Expenses expenses) {
         expensesService.addExpenses(expenses);
         return ResponseEntity.status(201).body(new ApiResponse("Expenses added successfully"));
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ApiResponse> updateExpenses(
-            @PathVariable Integer id,
-            @RequestBody @Valid Expenses expenses,
-            Errors errors
-    ) {
-        if (errors.hasErrors()) {
-            return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
-        }
+    public ResponseEntity<ApiResponse> updateExpenses(@PathVariable Integer id, @RequestBody @Valid Expenses expenses) {
         expensesService.updateExpenses(id, expenses);
         return ResponseEntity.ok(new ApiResponse("Expenses updated successfully"));
     }

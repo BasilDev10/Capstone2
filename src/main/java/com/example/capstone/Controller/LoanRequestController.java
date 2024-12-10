@@ -30,19 +30,13 @@ public class LoanRequestController {
 
     // endpoint 7
     @PostMapping("/add")
-    public ResponseEntity<ApiResponse> addLoanRequest(@RequestBody @Valid LoanRequest loanRequest, Errors errors) {
-        if (errors.hasErrors()) {
-            return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
-        }
+    public ResponseEntity<ApiResponse> addLoanRequest(@RequestBody @Valid LoanRequest loanRequest) {
         loanRequestService.addLoanRequest(loanRequest);
         return ResponseEntity.status(201).body(new ApiResponse("LoanRequest added successfully"));
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ApiResponse> updateLoanRequest(@PathVariable Integer id, @RequestBody @Valid LoanRequest loanRequest, Errors errors) {
-        if (errors.hasErrors()) {
-            return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
-        }
+    public ResponseEntity<ApiResponse> updateLoanRequest(@PathVariable Integer id, @RequestBody @Valid LoanRequest loanRequest) {
         loanRequestService.updateLoanRequest(id, loanRequest);
         return ResponseEntity.ok(new ApiResponse("LoanRequest updated successfully"));
     }

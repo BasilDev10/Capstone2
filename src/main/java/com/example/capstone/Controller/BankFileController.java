@@ -26,18 +26,11 @@ public class BankFileController {
     // upload transaction from bank file report
     @PostMapping("/add/{groupSavingAccountId}")
     public ResponseEntity addBankFile(@RequestParam("file") MultipartFile file , @PathVariable Integer groupSavingAccountId) {
-
-
         bankFileService.addBankFile(file , groupSavingAccountId);
         return ResponseEntity.status(201).body(new ApiResponse("BankFile added successfully"));
     }
-
-
     @PutMapping("/update/{id}")
-    public ResponseEntity updateBankFile(@PathVariable Integer id, @RequestBody @Valid BankFile bankFile, Errors errors) {
-        if (errors.hasErrors())
-            return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
-
+    public ResponseEntity updateBankFile(@PathVariable Integer id, @RequestBody @Valid BankFile bankFile) {
         bankFileService.updateBankFile(id, bankFile);
         return ResponseEntity.ok(new ApiResponse("BankFile updated successfully"));
     }

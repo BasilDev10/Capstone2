@@ -50,6 +50,8 @@ public class LoanRequest {
     @Column(columnDefinition = "VARCHAR(25) NOT NULL")
     private String status;
 
+    @NotNull(message = "Error: groupSavingAccountId is null")
+    @Column(columnDefinition = "int not null")
     private Integer groupSavingAccountId;
 
 

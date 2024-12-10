@@ -25,33 +25,17 @@ public class AccountSettingController {
 
     @GetMapping("/get/{id}")
     public ResponseEntity<AccountSetting> getAccountSettingById(@PathVariable Integer id) {
-        AccountSetting accountSetting = accountSettingService.getAccountSettingById(id);
-        if (accountSetting == null) {
-            return ResponseEntity.status(404).body(null);
-        }
-        return ResponseEntity.ok(accountSetting);
+        return ResponseEntity.ok(accountSettingService.getAccountSettingById(id));
     }
 
     @PostMapping("/add")
-    public ResponseEntity<ApiResponse> addAccountSetting(@RequestBody @Valid AccountSetting accountSetting, Errors errors) {
-        if (errors.hasErrors()) {
-            return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
-        }
-
+    public ResponseEntity<ApiResponse> addAccountSetting(@RequestBody @Valid AccountSetting accountSetting) {
         accountSettingService.addAccountSetting(accountSetting);
         return ResponseEntity.status(201).body(new ApiResponse("AccountSetting added successfully"));
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ApiResponse> updateAccountSetting(
-            @PathVariable Integer id,
-            @RequestBody @Valid AccountSetting accountSetting,
-            Errors errors
-    ) {
-        if (errors.hasErrors()) {
-            return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
-        }
-
+    public ResponseEntity<ApiResponse> updateAccountSetting(@PathVariable Integer id,@RequestBody @Valid AccountSetting accountSetting) {
         accountSettingService.updateAccountSetting(id, accountSetting);
         return ResponseEntity.ok(new ApiResponse("AccountSetting updated successfully"));
     }

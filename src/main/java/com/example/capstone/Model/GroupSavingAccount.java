@@ -29,18 +29,16 @@ public class GroupSavingAccount {
     @Column(columnDefinition = "VARCHAR(50) NOT NULL")
     private String name;
 
-    @NotNull(message = "Error: balance is null!")
-    @Column(columnDefinition = "double not null")
+    @Column(columnDefinition = "double default 0 ")
     private Double balance;
 
-    @NotNull(message = "Error: targetMemberTotalPayment is null!")
-    @Column(columnDefinition = "double not null")
+    @Column(columnDefinition = "double default 0 ")
     private Double targetAccountTotalPayment;
 
-
+    @Column(columnDefinition = "double default 0 ")
     private Double targetMemberTotalPayment;
-    @NotNull(message = "Error: overdueAmount  is null!")
-    @Column(columnDefinition = "double not null")
+
+    @Column(columnDefinition = "double default 0 ")
     private Double overdueAmount ;
 
     @NotNull(message = "Error: transactionDate is null")
@@ -48,6 +46,7 @@ public class GroupSavingAccount {
     private LocalDate StartDate;
 
 
+    @Column(columnDefinition = "int")
     private Integer accountSettingId;
 
 

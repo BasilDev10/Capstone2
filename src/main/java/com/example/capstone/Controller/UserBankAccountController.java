@@ -32,20 +32,14 @@ public class UserBankAccountController {
 
 
     @PostMapping("/add")
-    public ResponseEntity<ApiResponse> addUserBankAccount(@RequestBody @Valid UserBankAccount userBankAccount, Errors errors) {
-        if (errors.hasErrors()) {
-            return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
-        }
+    public ResponseEntity<ApiResponse> addUserBankAccount(@RequestBody @Valid UserBankAccount userBankAccount) {
         userBankAccountService.addUserBankAccount(userBankAccount);
         return ResponseEntity.status(201).body(new ApiResponse("UserBankAccount added successfully"));
     }
 
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ApiResponse> updateUserBankAccount(@PathVariable Integer id, @RequestBody @Valid UserBankAccount userBankAccount, Errors errors) {
-        if (errors.hasErrors()) {
-            return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
-        }
+    public ResponseEntity<ApiResponse> updateUserBankAccount(@PathVariable Integer id, @RequestBody @Valid UserBankAccount userBankAccount) {
         userBankAccountService.updateUserBankAccount(id, userBankAccount);
         return ResponseEntity.ok(new ApiResponse("UserBankAccount updated successfully"));
     }

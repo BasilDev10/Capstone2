@@ -24,7 +24,7 @@ public class Loan {
     private Double amount;
 
     @PositiveOrZero(message = "Error: PaidAmount must be positive or zero!")
-    @Column(columnDefinition = "double ")
+    @Column(columnDefinition = "double default 0 ")
     private Double paidAmount;
 
     @NotNull(message = "Error: LoanDate is null!")
@@ -50,15 +50,17 @@ public class Loan {
     @Column(columnDefinition = "VARCHAR(25) NOT NULL ")
     private String status;
 
-
+    @NotNull(message = "Error: groupSavingAccountId is null")
+    @Column(columnDefinition = "int not null")
     private Integer groupSavingAccountId;
 
-
+    @NotNull(message = "Error: userId is null")
+    @Column(columnDefinition = "int not null")
     private Integer userId;
 
-
+    @Column(columnDefinition = "int ")
     private Integer transactionId;
 
-
+    @Column(columnDefinition = "int ")
     private Integer loanRequestId;
 }

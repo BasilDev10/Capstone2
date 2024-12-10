@@ -22,19 +22,13 @@ public class UserController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity addUser(@RequestBody @Valid User user, Errors errors) {
-        if (errors.hasErrors())
-            return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
-
+    public ResponseEntity addUser(@RequestBody @Valid User user) {
         userService.addUser(user);
         return ResponseEntity.status(201).body(new ApiResponse("User added successfully"));
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity updateUser(@PathVariable Integer id, @RequestBody @Valid User user, Errors errors) {
-        if (errors.hasErrors())
-            return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
-
+    public ResponseEntity updateUser(@PathVariable Integer id, @RequestBody @Valid User user) {
         userService.updateUser(id, user);
         return ResponseEntity.ok(new ApiResponse("User updated successfully"));
     }

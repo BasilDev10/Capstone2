@@ -26,9 +26,8 @@ public class PaymentSchedule {
     @Column(columnDefinition = "DOUBLE NOT NULL")
     private Double amount;
 
-    @NotNull(message = "Error: Amount is null!")
     @PositiveOrZero(message = "Error: Amount must be positive or zero!")
-    @Column(columnDefinition = "DOUBLE NOT NULL")
+    @Column(columnDefinition = "double default 0")
     private Double PaidAmount;
 
     @NotEmpty(message = "Error: paymentType is empty!")
@@ -53,9 +52,11 @@ public class PaymentSchedule {
 
     private Integer loanId;
 
-
+    @NotNull(message = "Error: groupSavingAccountId is null")
+    @Column(columnDefinition = "int not null")
     private Integer groupSavingAccountId;
 
-
+    @NotNull(message = "Error: userId is null")
+    @Column(columnDefinition = "int not null")
     private Integer userId;
 }

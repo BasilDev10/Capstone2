@@ -22,19 +22,13 @@ public class TransactionController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity addTransaction(@RequestBody @Valid Transaction transaction, Errors errors) {
-        if (errors.hasErrors())
-            return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
-
+    public ResponseEntity addTransaction(@RequestBody @Valid Transaction transaction) {
         transactionService.addTransaction(transaction);
         return ResponseEntity.status(201).body(new ApiResponse("Transaction added successfully"));
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity updateTransaction(@PathVariable Integer id, @RequestBody @Valid Transaction transaction, Errors errors) {
-        if (errors.hasErrors())
-            return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
-
+    public ResponseEntity updateTransaction(@PathVariable Integer id, @RequestBody @Valid Transaction transaction) {
         transactionService.updateTransaction(id, transaction);
         return ResponseEntity.ok(new ApiResponse("Transaction updated successfully"));
     }

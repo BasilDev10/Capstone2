@@ -40,5 +40,6 @@ public class Expenses {
 
     @Column(columnDefinition = "int")
     private Integer transactionId;
+    @Column(columnDefinition = "int")
     private Integer userId;
 }

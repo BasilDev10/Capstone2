@@ -34,10 +34,7 @@ public class PaymentScheduleController {
         return ResponseEntity.ok(paymentScheduleService.getAllPaymentSchedulesByUserId(userId));
     }
     @PostMapping("/add")
-    public ResponseEntity<ApiResponse> addPaymentSchedule(@RequestBody @Valid PaymentSchedule paymentSchedule, Errors errors) {
-        if (errors.hasErrors()) {
-            return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
-        }
+    public ResponseEntity<ApiResponse> addPaymentSchedule(@RequestBody @Valid PaymentSchedule paymentSchedule) {
         paymentScheduleService.addPaymentSchedule(paymentSchedule);
         return ResponseEntity.status(201).body(new ApiResponse("PaymentSchedule added successfully"));
     }
@@ -45,14 +42,7 @@ public class PaymentScheduleController {
 
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ApiResponse> updatePaymentSchedule(
-            @PathVariable Integer id,
-            @RequestBody @Valid PaymentSchedule paymentSchedule,
-            Errors errors
-    ) {
-        if (errors.hasErrors()) {
-            return ResponseEntity.status(400).body(new ApiResponse(errors.getFieldError().getDefaultMessage()));
-        }
+    public ResponseEntity<ApiResponse> updatePaymentSchedule(@PathVariable Integer id,@RequestBody @Valid PaymentSchedule paymentSchedule) {
         paymentScheduleService.updatePaymentSchedule(id, paymentSchedule);
         return ResponseEntity.ok(new ApiResponse("PaymentSchedule updated successfully"));
     }

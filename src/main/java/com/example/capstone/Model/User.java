@@ -3,6 +3,7 @@ package com.example.capstone.Model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -39,7 +40,8 @@ public class User {
     @Pattern(regexp = "leader|member", message = "Error: role must be either 'leader' or 'member'")
     @Column(columnDefinition = "VARCHAR(10) NOT NULL")
     private String role;
-
+    @NotNull(message = "Error: groupSavingAccountId is null")
+    @Column(columnDefinition = "int not null")
     private Integer groupSavingAccountId;
 
 }
